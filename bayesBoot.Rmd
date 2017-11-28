@@ -10,7 +10,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ## The Bayesian bootstrap revisited
-Definie our restricted variation of linear bootstrap resampling via a weighting distribution $f_w$ so that if $w_i \sim_{iid} f_w$ then $b = (b_1, \ldots, b_n)^t = (w_1^t y_1 \ldots w_n^2 y_n)$ is a bootstrap (re)sample.  We describe this as linear bootstrap resampling in that we assume that a useful empirical distribution can be obtained by linearly reweighting the observed data.
+Define our restricted variation of linear bootstrap resampling via a weighting distribution $f_w$ so that if $w_i \sim_{iid} f_w$ then $b = (b_1, \ldots, b_n)^t = (w_1^t y_1 \ldots w_n^2 y_n)$ is a bootstrap (re)sample.  We describe this as linear bootstrap resampling in that we assume that a useful empirical distribution can be obtained by linearly reweighting the observed data.
 The classic non-parametric bootstrap sets $f_w$ as a multinomial distribution with one trial and equal category probabilities. Let $s$ be a statistic so that $\theta^* = s(b)$ is a bootstrapped resampled statistic having density $f_{\theta^*}(\theta)$.  Let $\pi(\theta, \psi)$ be a joint prior. 
 
 We are interested in conditions in which $f_{\theta^*}(\theta)$ can be considered a posterior marginalized over nuisance parameters. That is,
