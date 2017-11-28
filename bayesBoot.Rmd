@@ -1,0 +1,58 @@
+---
+title: "Bayesian Bootstrap revisited"
+author: "Brian Caffo, Martin Lindquist, Ciprian Crainiceanu, Vadim Zipunnikov"
+date: "11/28/2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## The Bayesian bootstrap revisited
+Definie our restricted variation of linear bootstrap resampling via a weighting distribution $f_w$ so that if $w_i \sim_{iid} f_w$ then $b = (b_1, \ldots, b_n)^t = (w_1^t y_1 \ldots w_n^2 y_n)$ is a bootstrap (re)sample.  We describe this as linear bootstrap resampling in that we assume that a useful empirical distribution can be obtained by linearly reweighting the observed data.
+The classic non-parametric bootstrap sets $f_w$ as a multinomial distribution with one trial and equal category probabilities. Let $s$ be a statistic so that $\theta^* = s(b)$ is a bootstrapped resampled statistic having density $f_{\theta^*}(\theta)$.  Let $\pi(\theta, \psi)$ be a joint prior. 
+
+We are interested in conditions in which $f_{\theta^*}(\theta)$ can be considered a posterior marginalized over nuisance parameters. That is,
+
+$$
+\dagger ~f_{\theta^*}(\theta) = \frac{\int f_y(y; \theta, \psi) \pi(\theta, \psi) d\psi}{\int \int f_y(y; \tilde \theta, \psi) \pi(\tilde \theta, \psi) d\psi d\tilde \theta}.
+$$
+
+
+The left hand side of this equation depends one's choice of $f_w$ (bootstrap weighting distribution) and $s$ (the statistic) whereas the righthand side depends on $f_y$ (the likelihood) and $\pi$ (the prior). Choose any three and the fourth is determined, assuming a solution to the equation exists for the choices.
+
+Settings for which this equation holds may have large pedagogical advantages by yielding equivalent Bayesian and frequency inferences within the same framework. In other words, one could teach a fairly unified variation of statistic using the bootstrap, a technique already of fundamental importance in introductory statistics instruction.
+
+
+## Examples
+
+### Normal mean
+Consider the instance where $f_y$ is a the product of $n$ $N(\theta, \psi)$ densities, $s$ is the sample mean and $f_w$ is a singular normal with mean $\frac{1}{n}J_n$ and variance $\frac{1}{n-1}(I - J_n J_n^t)$ where $J_n$ is an $n-$vector of ones. Then, $f_{\theta^*}$ is $N(\bar y, s^2_y / n)$ where $\bar y$ and $s^2$ are the sample mean and (unbiased) sample variance, respectively.  Under the assumption that $f_y$ is normal $\theta$, $\psi$ and $\pi$ is improper so that $\pi(\theta, \psi) = 1 / \psi$ we obtain the equality in Equation $\dagger$. 
+
+### Normal variance
+Consider the prior example where now $f_y$ is the product of $n$ $N(\psi, \theta)$ densities (i.e. interest lies in the variance). The distribution of $b_i$ is $N(\bar y, s^2_y)$ and thus the distribution of $\theta^*$ is $s^2 X / (n-1)$ where $X$ is a chi-squared distribution with $n-1$ degrees of freedom.  
+[WHAT BAYES MODEL DOES THIS CORRESPOND TO? SOMETHING IMPROPER].
+
+### Bootstrap associated prior
+The associated prior can be easily estimated from the bootstrap distribution in the event that there is no nuisance parameter (given a likelihood, resampling distribution and statistic).  In this case, $\dagger$ simplifies to:
+$$
+f_{\theta^*}(\theta)
+\propto_\theta f_y(y; \theta) \pi(\theta)
+$$
+Thus given a bootstrap sample statistic, $\theta^*_1, \ldots, \theta^*_N$, one could approximate the associated prior via:
+$$
+P(\theta \leq t) = \frac{\sum_{j=1}^N I(\theta^*_j \leq t) / f_y(y; t)}{\sum_{j=1}^N 1/ f_y(y; t)}.
+$$
+In the case of discrete resampling distributions, such as the non-parametric bootstrap, with continuous outcomes, the prior has the unfortunate consequence of its support depending on the data. 
+
+
+### Beta binomial
+Let $f_w$ be such that the average of $n$ iid draws form a Dirichlet distribution with concentration parameter vector $(1/n \ldots 1/n)^t$. 
+Let $f_y$ be the product of $n$ Bernoulli mass functions with parameter $\theta$. Therefore, 
+$\theta^* = \frac{1}{n}\sum_{j=1}^n w^t_i y = d^t y$ is a bootstrap resampled proportion of successes where $d$ is the aforementioned Dirichlet draw.  As $d^t y$ is the sum of $x=J_n' y$ elements of $d$, $\theta^*$follows a Beta$(x, n-x)$ distribution. Thus, $\pi$ is uniform$[0,1]$.
+
+
+
+
+
