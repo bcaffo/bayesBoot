@@ -1,5 +1,5 @@
 ---
-title: "Bayesian Bootstrap revisited"
+title: "Bootstrap implied Bayes inference"
 author: "Brian Caffo, Martin Lindquist, Ciprian Crainiceanu, Vadim Zipunnikov"
 date: "11/28/2017"
 output: html_document
@@ -9,50 +9,81 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## The Bayesian bootstrap revisited
-Define our restricted variation of linear bootstrap resampling via a weighting distribution $f_w$ so that if $w_i \sim_{iid} f_w$ then $b = (b_1, \ldots, b_n)^t = (w_1^t y_1 \ldots w_n^2 y_n)$ is a bootstrap (re)sample.  We describe this as linear bootstrap resampling in that we assume that a useful empirical distribution can be obtained by linearly reweighting the observed data.
-The classic non-parametric bootstrap sets $f_w$ as a multinomial distribution with one trial and equal category probabilities. Let $s$ be a statistic so that $\theta^* = s(b)$ is a bootstrapped resampled statistic having density $f_{\theta^*}(\theta)$.  Let $\pi(\theta, \psi)$ be a joint prior. 
+## Bootstrap implied Bayes inference
+Consider observed outcome data $y=(y_1, \ldots y_n)$ arising from density $f_y(y; \theta, \psi)$ depending on parameter of interest $\theta$ and nuisance paramter, $\psi$.
+Let $b = (b_1, \ldots, b_n)^t$ be a bootstrap resample. For example, $b = (b_1, \ldots, b_n)^t = (w_1^t y_1 \ldots w_n^2 y_n)$ where $w_i \sim_{iid} f_w$ where $f_w$ is a resampling distribution.  This could be described as linear bootstrap resampling in that it assumes a useful empirical distribution can be obtained by linearly resampling or reweighting the observed data.
+The classic non-parametric bootstrap sets $f_w$ as a multinomial distribution with one trial and equal category probabilities. Other resampling schemes might directly employ $f_y$ or other residual or parametric strategies.
 
+Let $s$ be a statistic so that $\theta^* = s(b)$ is a bootstrapped resampled statistic having density $f_{\theta^*}(\theta)$.  Let $\pi(\theta, \psi)$ be a joint prior. 
 We are interested in conditions in which $f_{\theta^*}(\theta)$ can be considered a posterior marginalized over nuisance parameters. That is,
-
 $$
-\dagger ~f_{\theta^*}(\theta) = \frac{\int f_y(y; \theta, \psi) \pi(\theta, \psi) d\psi}{\int \int f_y(y; \tilde \theta, \psi) \pi(\tilde \theta, \psi) d\psi d\tilde \theta}.
+\dagger ~f_{\theta^*}(\theta) = \frac{\int f_y(y; \theta, \psi) \pi(\theta, \psi) d\psi}{\int \int f_y(y; \tilde \theta, \tilde \psi) \pi(\tilde \theta, \tilde \psi) d\tilde \psi d\tilde \theta} = \int f_y(y; \theta, \psi) \pi(\theta, \psi) / C,
+$$
+where $C$ is the normalizing constant.
+
+The left hand side of this equation depends on the bootstrap sampling distribution (such as choice of $f_w$) and $s$ (the statistic), whereas the righthand side depends on $f_y$ (the likelihood) and $\pi$ (the prior). Choose any three and the fourth is determined, assuming a solution to the equation exists for the choices. 
+
+It is easy to conceptualize instances where this equality necessarily fails; not every marginal posterior arises from a proper prior given a likelihood. Several examples where improper priors are obtained are given below. In addition, when using the non-parametric bootstrap, one obtains a prior distribution depending on the data, truly violating the nature of the approach. Finally, the statistic might produces estimates outside of the range of the parameter, such as negative variance components, which will clearly yield no acceptable solution to $\dagger$.
+
+
+While this potential identity is interesting in its own right, we are primarily interested in calculating an associated prior from the bootstrap sampled distribution. Thus, given a bootstrap distribution associated with resampling one could postulate a likelihood and see the prior that would result in equivalent inference. Such a process would allow one to employ Bootstrap analyses and allow one to interogate Bayesian statements presuming a choice of likelihood.
+
+In addition, settings for which this equation holds may have large pedagogical advantages by yielding equivalent Bayesian and frequency inferences within the same framework. In other words, one could teach a fairly unified variation of statistic using the bootstrap, a technique already of fundamental importance in introductory statistics instruction.
+
+### Bootstrap associated prior
+Given the relationship given by $\dagger$, we have:
+$$
+f_{\theta^*}(\theta) = \pi(\theta) \int f_y(y; \theta, \psi) \pi(\psi ~|~ \theta) d\psi / C
+= \pi(\theta) {\cal L}(\theta; y) / C,
+$$
+where $${\cal L}(\theta) = \int f_y(y; \theta, \psi) \pi(\psi ~|~ \theta) d\psi$$ is the integrated likelihood [REFERENCE BERGER]. In other words, the implied prior from a bootstrap sampled statistic is
+$$
+\pi(\theta) = \frac{f_{\theta^*}(\theta)C}{{\cal L}(\theta; y)} \propto_\theta \frac{f_{\theta^*}(\theta)}{{\cal L}(\theta; y)}
+$$
+In the event that there is no nuisance parameter, then the integrated likelihood is simply the likelihood.
+
+When there is a nuisance parameter, $\pi$ must be estimated. Assuming that: *i.* the likelihood is known, *ii.* the conditional prior $\pi(\psi ~|~ \theta)$ is known and *iii.* can be simulated from and *iv.* 
+$\pi(\psi ~|~ \theta, y)$ can be simulated from, then $\pi(\theta)$ can be estimated using Monte Carlo via the bootstrap resamples. This requires estimating: $f_{\theta^*}$, $\gamma(\theta)$ and, if desired, $C$. The bootstrapped statistic density or mass function, $f_{\theta^*}(\theta)$, can be assumed known, or well approximated via the bootstrap resampled statistics. Given bootstrap simulations, $\theta^*_j$ and simulations $\psi_j \sim \pi(\psi ~|~ \theta^*_j, y)$, an approximation is given by importance sampling:
+$$
+\hat C = \left( \frac{1}{N}\sum_{j=1}^N \frac{1}{f_y(y; \theta^*_j, \psi_j)} \right)^{-1}
+~~~\mbox{and}~~~ \hat {\cal L}(\theta; y) = \frac{1}{N} \sum_{j=1}^N f_y(y;\theta, \psi_j)\frac{\pi(\theta_j)}{f_{\theta^*}(\theta_j^*)\pi(\psi_j ~|~ \theta_j^*, y)}.
+$$
+The marginal likelihood estimate can be adapted as
+$$
+\frac{\sum_{j=1}^N f_y(y;\theta, \psi_j)\frac{\pi(\theta_j)}{f_{\theta^*}(\theta_j^*)\pi(\psi_j ~|~ \theta_j^*, y)}}{\sum_{j=1}^N \frac{\pi(\theta_j)}{f_{\theta^*}(\theta_j^*)\pi(\psi_j ~|~ \theta_j^*, y)}},
 $$
 
+if $\pi(\psi ~|~ \theta, y)$ can only be calculated up to constants of proportionality.
 
-The left hand side of this equation depends one's choice of $f_w$ (bootstrap weighting distribution) and $s$ (the statistic) whereas the righthand side depends on $f_y$ (the likelihood) and $\pi$ (the prior). Choose any three and the fourth is determined, assuming a solution to the equation exists for the choices.
+Thus out estimate of $\pi(\theta)$ is:
+$$
+\hat \pi(\theta) = \frac{f_{\theta^*}(\theta)}{\hat {\cal L}(\theta)} \hat C \propto_\theta \frac{f_{\theta^*}(\theta)}{\hat {\cal L}(\theta)}.
+$$
 
-Settings for which this equation holds may have large pedagogical advantages by yielding equivalent Bayesian and frequency inferences within the same framework. In other words, one could teach a fairly unified variation of statistic using the bootstrap, a technique already of fundamental importance in introductory statistics instruction.
+A concern are errors in the estimation of the integrated likelihood for low probability values. 
+A second concern lies in issues when the prior is improper.
 
-
-## Examples
+## Analytic examples
 
 ### Normal mean
 Consider the instance where $f_y$ is a the product of $n$ $N(\theta, \psi)$ densities, $s$ is the sample mean and $f_w$ is a singular normal with mean $\frac{1}{n}J_n$ and variance $\frac{1}{n-1}(I - J_n J_n^t)$ where $J_n$ is an $n-$vector of ones. Then, $f_{\theta^*}$ is $N(\bar y, s^2_y / n)$ where $\bar y$ and $s^2$ are the sample mean and (unbiased) sample variance, respectively.  Under the assumption that $f_y$ is normal $\theta$, $\psi$ and $\pi$ is improper so that $\pi(\theta, \psi) = 1 / \psi$ we obtain the equality in Equation $\dagger$. 
 
-### Normal variance
-Consider the prior example where now $f_y$ is the product of $n$ $N(\psi, \theta)$ densities (i.e. interest lies in the variance). The distribution of $b_i$ is $N(\bar y, s^2_y)$ and thus the distribution of $\theta^*$ is $s^2 X / (n-1)$ where $X$ is a chi-squared distribution with $n-1$ degrees of freedom.  
-[WHAT BAYES MODEL DOES THIS CORRESPOND TO? SOMETHING IMPROPER].
-
-### Bootstrap associated prior
-The associated prior can be easily estimated from the bootstrap distribution in the event that there is no nuisance parameter (given a likelihood, resampling distribution and statistic).  In this case, $\dagger$ simplifies to:
-$$
-f_{\theta^*}(\theta)
-\propto_\theta f_y(y; \theta) \pi(\theta)
-$$
-Thus given a bootstrap sample statistic, $\theta^*_1, \ldots, \theta^*_N$, one could approximate the associated prior via:
-$$
-P(\theta \leq t) = \frac{\sum_{j=1}^N I(\theta^*_j \leq t) / f_y(y; t)}{\sum_{j=1}^N 1/ f_y(y; t)}.
-$$
-In the case of discrete resampling distributions, such as the non-parametric bootstrap, with continuous outcomes, the prior has the unfortunate consequence of its support depending on the data. 
-
-
 ### Beta binomial
 Let $f_w$ be such that the average of $n$ iid draws form a Dirichlet distribution with concentration parameter vector $(1/n \ldots 1/n)^t$. 
 Let $f_y$ be the product of $n$ Bernoulli mass functions with parameter $\theta$. Therefore, 
-$\theta^* = \frac{1}{n}\sum_{j=1}^n w^t_i y = d^t y$ is a bootstrap resampled proportion of successes where $d$ is the aforementioned Dirichlet draw.  As $d^t y$ is the sum of $x=J_n' y$ elements of $d$, $\theta^*$follows a Beta$(x, n-x)$ distribution. Thus, $\pi$ is uniform$[0,1]$.
+$\theta^* = \frac{1}{n}\sum_{j=1}^n w^t_i y = d^t y$ is a bootstrap resampled proportion of successes where $d$ is the aforementioned Dirichlet draw.  As $d^t y$ is the sum of $x=J_n' y$ elements of $d$, $\theta^*$follows a Beta$(x, n-x)$ distribution. Thus, $\pi(\theta)$ is uniform$[0,1]$.
+
+### Regression
+Let $f_y$ be $N(x\beta, \psi_2 I)$ for $x=[x_1 ~ x_2]$ where $x_1$ is $n\times 1$ and $x_2$ is $n\times p-1$ and $\beta=(\theta, \psi_1^t)^t$.  Let $b_i = [x_i^t (x^t x)^{-1} x^t + w_i ^t (I - x (x^t x)^{-1} x^t)] y$ where $w_i \sim N\left(0, \frac{1}{n-p}I\right)$ so that $b_i$ is the residual bootstrap assuming Gaussian errors.  Then, $b \sim N(x \hat \beta, s_p^2)$ where $s_p^2$ is the (unbiased) residual variance.
+$f_{\theta^*}(\theta) \sim N(\hat \theta, s_p^2 / [x_i^t (x^t x)^{-1} x_i])$. WHAT PRIORS DOES THIS CORRESPOND TO?
+
+## Numerical examples
+
+The analytic examples display how the parametric bootstrap
 
 
+## Discussion
 
-
+### Relationship with Rubin's Bayesian bootstrap
+Rubin presented a Bayesian bootstrap where the empirical probability distribution was simulated as a Dirichlet mixture of multinomials. That is, $F_w$ was simulated as a multinomial$(d,1)$ with probability vector $d$ simualted via a Dirichlet.  
 
