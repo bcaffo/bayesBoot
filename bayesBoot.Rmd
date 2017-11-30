@@ -3,6 +3,7 @@ title: "Bootstrap implied Bayes inference"
 author: "Brian Caffo, Martin Lindquist, Ciprian Crainiceanu, Vadim Zipunnikov"
 date: "11/28/2017"
 output: html_document
+bibliography: bibliography.bib
 ---
 
 ```{r setup, include=FALSE}
@@ -36,14 +37,14 @@ $$
 f_{\theta^*}(\theta) = \pi(\theta) \int f_y(y; \theta, \psi) \pi(\psi ~|~ \theta) d\psi / C
 = \pi(\theta) {\cal L}(\theta; y) / C,
 $$
-where $${\cal L}(\theta) = \int f_y(y; \theta, \psi) \pi(\psi ~|~ \theta) d\psi$$ is the integrated likelihood [REFERENCE BERGER]. In other words, the implied prior from a bootstrap sampled statistic is
+where $${\cal L}(\theta) = \int f_y(y; \theta, \psi) \pi(\psi ~|~ \theta) d\psi$$ is the integrated likelihood (see @berger1999integrated). In other words, the implied prior from a bootstrap sampled statistic is
 $$
 \pi(\theta) = \frac{f_{\theta^*}(\theta)C}{{\cal L}(\theta; y)} \propto_\theta \frac{f_{\theta^*}(\theta)}{{\cal L}(\theta; y)}
 $$
 In the event that there is no nuisance parameter, then the integrated likelihood is simply the likelihood.
 
-When there is a nuisance parameter, $\pi$ must be estimated. Assuming that: *i.* the likelihood is known, *ii.* the conditional prior $\pi(\psi ~|~ \theta)$ is known and *iii.* can be simulated from and *iv.* 
-$\pi(\psi ~|~ \theta, y)$ can be simulated from, then $\pi(\theta)$ can be estimated using Monte Carlo via the bootstrap resamples. This requires estimating: $f_{\theta^*}$, $\gamma(\theta)$ and, if desired, $C$. The bootstrapped statistic density or mass function, $f_{\theta^*}(\theta)$, can be assumed known, or well approximated via the bootstrap resampled statistics. Given bootstrap simulations, $\theta^*_j$ and simulations $\psi_j \sim \pi(\psi ~|~ \theta^*_j, y)$, an approximation is given by importance sampling:
+When there is a nuisance parameter, $\pi$ must be estimated. Assuming that: *i.* the likelihood is known, *ii.* the conditional prior $\pi(\psi ~|~ \theta)$ is known  and *iii.* 
+$\pi(\psi ~|~ \theta, y)$ can be simulated from and evaluated, then $\pi(\theta)$ can be estimated using Monte Carlo via the bootstrap resamples. This requires estimating: $f_{\theta^*}$, $\gamma(\theta)$ and, if desired, $C$. The bootstrapped statistic density or mass function, $f_{\theta^*}(\theta)$, can be assumed known, or well approximated via the bootstrap resampled statistics. Given bootstrap simulations, $\theta^*_j$ and simulations $\psi_j \sim \pi(\psi ~|~ \theta^*_j, y)$, an approximation is given by importance sampling:
 $$
 \hat C = \left( \frac{1}{N}\sum_{j=1}^N \frac{1}{f_y(y; \theta^*_j, \psi_j)} \right)^{-1}
 ~~~\mbox{and}~~~ \hat {\cal L}(\theta; y) = \frac{1}{N} \sum_{j=1}^N f_y(y;\theta, \psi_j)\frac{\pi(\theta_j)}{f_{\theta^*}(\theta_j^*)\pi(\psi_j ~|~ \theta_j^*, y)}.
@@ -71,7 +72,7 @@ Consider the instance where $f_y$ is a the product of $n$ $N(\theta, \psi)$ dens
 ### Beta binomial
 Let $f_w$ be such that the average of $n$ iid draws form a Dirichlet distribution with concentration parameter vector $(1/n \ldots 1/n)^t$. 
 Let $f_y$ be the product of $n$ Bernoulli mass functions with parameter $\theta$. Therefore, 
-$\theta^* = \frac{1}{n}\sum_{j=1}^n w^t_i y = d^t y$ is a bootstrap resampled proportion of successes where $d$ is the aforementioned Dirichlet draw.  As $d^t y$ is the sum of $x=J_n' y$ elements of $d$, $\theta^*$follows a Beta$(x, n-x)$ distribution. Thus, $\pi(\theta)$ is uniform$[0,1]$.
+$\theta^* = \frac{1}{n}\sum_{j=1}^n w^t_i y = d^t y$ is a bootstrap resampled proportion of successes where $d$ is the aforementioned Dirichlet draw.  As $d^t y$ is the sum of $J_n' y$ elements of $d$, $\theta^*$follows a Beta$(x, n-x)$ distribution. Thus, $\pi(\theta)$ is uniform$[0,1]$.
 
 ### Regression
 Let $f_y$ be $N(x\beta, \psi_2 I)$ for $x=[x_1 ~ x_2]$ where $x_1$ is $n\times 1$ and $x_2$ is $n\times p-1$ and $\beta=(\theta, \psi_1^t)^t$.  Let $b_i = [x_i^t (x^t x)^{-1} x^t + w_i ^t (I - x (x^t x)^{-1} x^t)] y$ where $w_i \sim N\left(0, \frac{1}{n-p}I\right)$ so that $b_i$ is the residual bootstrap assuming Gaussian errors.  Then, $b \sim N(x \hat \beta, s_p^2)$ where $s_p^2$ is the (unbiased) residual variance.
@@ -85,5 +86,8 @@ The analytic examples display how the parametric bootstrap
 ## Discussion
 
 ### Relationship with Rubin's Bayesian bootstrap
-Rubin presented a Bayesian bootstrap where the empirical probability distribution was simulated as a Dirichlet mixture of multinomials. That is, $F_w$ was simulated as a multinomial$(d,1)$ with probability vector $d$ simualted via a Dirichlet.  
+Rubin presented a Bayesian bootstrap  (@rubin1981bayesian) where the empirical probability distribution was simulated as a Dirichlet mixture of multinomials. That is, $F_w$ was simulated as a multinomial$(d,1)$ with probability vector $d$ simualted via a Dirichlet.  
+
+## References
+
 

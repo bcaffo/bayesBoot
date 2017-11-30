@@ -141,10 +141,10 @@ $(document).ready(function () {
 <p>Given the relationship given by <span class="math inline">\(\dagger\)</span>, we have: <span class="math display">\[
 f_{\theta^*}(\theta) = \pi(\theta) \int f_y(y; \theta, \psi) \pi(\psi ~|~ \theta) d\psi / C
 = \pi(\theta) {\cal L}(\theta; y) / C,
-\]</span> where <span class="math display">\[{\cal L}(\theta) = \int f_y(y; \theta, \psi) \pi(\psi ~|~ \theta) d\psi\]</span> is the integrated likelihood [REFERENCE BERGER]. In other words, the implied prior from a bootstrap sampled statistic is <span class="math display">\[
+\]</span> where <span class="math display">\[{\cal L}(\theta) = \int f_y(y; \theta, \psi) \pi(\psi ~|~ \theta) d\psi\]</span> is the integrated likelihood (see <span class="citation">Berger et al. (1999)</span>). In other words, the implied prior from a bootstrap sampled statistic is <span class="math display">\[
 \pi(\theta) = \frac{f_{\theta^*}(\theta)C}{{\cal L}(\theta; y)} \propto_\theta \frac{f_{\theta^*}(\theta)}{{\cal L}(\theta; y)}
 \]</span> In the event that there is no nuisance parameter, then the integrated likelihood is simply the likelihood.</p>
-<p>When there is a nuisance parameter, <span class="math inline">\(\pi\)</span> must be estimated. Assuming that: <em>i.</em> the likelihood is known, <em>ii.</em> the conditional prior <span class="math inline">\(\pi(\psi ~|~ \theta)\)</span> is known and <em>iii.</em> can be simulated from and <em>iv.</em> <span class="math inline">\(\pi(\psi ~|~ \theta, y)\)</span> can be simulated from, then <span class="math inline">\(\pi(\theta)\)</span> can be estimated using Monte Carlo via the bootstrap resamples. This requires estimating: <span class="math inline">\(f_{\theta^*}\)</span>, <span class="math inline">\(\gamma(\theta)\)</span> and, if desired, <span class="math inline">\(C\)</span>. The bootstrapped statistic density or mass function, <span class="math inline">\(f_{\theta^*}(\theta)\)</span>, can be assumed known, or well approximated via the bootstrap resampled statistics. Given bootstrap simulations, <span class="math inline">\(\theta^*_j\)</span> and simulations <span class="math inline">\(\psi_j \sim \pi(\psi ~|~ \theta^*_j, y)\)</span>, an approximation is given by importance sampling: <span class="math display">\[
+<p>When there is a nuisance parameter, <span class="math inline">\(\pi\)</span> must be estimated. Assuming that: <em>i.</em> the likelihood is known, <em>ii.</em> the conditional prior <span class="math inline">\(\pi(\psi ~|~ \theta)\)</span> is known and <em>iii.</em> <span class="math inline">\(\pi(\psi ~|~ \theta, y)\)</span> can be simulated from and evaluated, then <span class="math inline">\(\pi(\theta)\)</span> can be estimated using Monte Carlo via the bootstrap resamples. This requires estimating: <span class="math inline">\(f_{\theta^*}\)</span>, <span class="math inline">\(\gamma(\theta)\)</span> and, if desired, <span class="math inline">\(C\)</span>. The bootstrapped statistic density or mass function, <span class="math inline">\(f_{\theta^*}(\theta)\)</span>, can be assumed known, or well approximated via the bootstrap resampled statistics. Given bootstrap simulations, <span class="math inline">\(\theta^*_j\)</span> and simulations <span class="math inline">\(\psi_j \sim \pi(\psi ~|~ \theta^*_j, y)\)</span>, an approximation is given by importance sampling: <span class="math display">\[
 \hat C = \left( \frac{1}{N}\sum_{j=1}^N \frac{1}{f_y(y; \theta^*_j, \psi_j)} \right)^{-1}
 ~~~\mbox{and}~~~ \hat {\cal L}(\theta; y) = \frac{1}{N} \sum_{j=1}^N f_y(y;\theta, \psi_j)\frac{\pi(\theta_j)}{f_{\theta^*}(\theta_j^*)\pi(\psi_j ~|~ \theta_j^*, y)}.
 \]</span> The marginal likelihood estimate can be adapted as <span class="math display">\[
@@ -165,7 +165,7 @@ f_{\theta^*}(\theta) = \pi(\theta) \int f_y(y; \theta, \psi) \pi(\psi ~|~ \theta
 </div>
 <div id="beta-binomial" class="section level3">
 <h3>Beta binomial</h3>
-<p>Let <span class="math inline">\(f_w\)</span> be such that the average of <span class="math inline">\(n\)</span> iid draws form a Dirichlet distribution with concentration parameter vector <span class="math inline">\((1/n \ldots 1/n)^t\)</span>. Let <span class="math inline">\(f_y\)</span> be the product of <span class="math inline">\(n\)</span> Bernoulli mass functions with parameter <span class="math inline">\(\theta\)</span>. Therefore, <span class="math inline">\(\theta^* = \frac{1}{n}\sum_{j=1}^n w^t_i y = d^t y\)</span> is a bootstrap resampled proportion of successes where <span class="math inline">\(d\)</span> is the aforementioned Dirichlet draw. As <span class="math inline">\(d^t y\)</span> is the sum of <span class="math inline">\(x=J_n' y\)</span> elements of <span class="math inline">\(d\)</span>, <span class="math inline">\(\theta^*\)</span>follows a Beta<span class="math inline">\((x, n-x)\)</span> distribution. Thus, <span class="math inline">\(\pi(\theta)\)</span> is uniform<span class="math inline">\([0,1]\)</span>.</p>
+<p>Let <span class="math inline">\(f_w\)</span> be such that the average of <span class="math inline">\(n\)</span> iid draws form a Dirichlet distribution with concentration parameter vector <span class="math inline">\((1/n \ldots 1/n)^t\)</span>. Let <span class="math inline">\(f_y\)</span> be the product of <span class="math inline">\(n\)</span> Bernoulli mass functions with parameter <span class="math inline">\(\theta\)</span>. Therefore, <span class="math inline">\(\theta^* = \frac{1}{n}\sum_{j=1}^n w^t_i y = d^t y\)</span> is a bootstrap resampled proportion of successes where <span class="math inline">\(d\)</span> is the aforementioned Dirichlet draw. As <span class="math inline">\(d^t y\)</span> is the sum of <span class="math inline">\(J_n' y\)</span> elements of <span class="math inline">\(d\)</span>, <span class="math inline">\(\theta^*\)</span>follows a Beta<span class="math inline">\((x, n-x)\)</span> distribution. Thus, <span class="math inline">\(\pi(\theta)\)</span> is uniform<span class="math inline">\([0,1]\)</span>.</p>
 </div>
 <div id="regression" class="section level3">
 <h3>Regression</h3>
@@ -180,7 +180,18 @@ f_{\theta^*}(\theta) = \pi(\theta) \int f_y(y; \theta, \psi) \pi(\psi ~|~ \theta
 <h2>Discussion</h2>
 <div id="relationship-with-rubins-bayesian-bootstrap" class="section level3">
 <h3>Relationship with Rubin’s Bayesian bootstrap</h3>
-<p>Rubin presented a Bayesian bootstrap where the empirical probability distribution was simulated as a Dirichlet mixture of multinomials. That is, <span class="math inline">\(F_w\)</span> was simulated as a multinomial<span class="math inline">\((d,1)\)</span> with probability vector <span class="math inline">\(d\)</span> simualted via a Dirichlet.</p>
+<p>Rubin presented a Bayesian bootstrap (<span class="citation">Rubin and others (1981)</span>) where the empirical probability distribution was simulated as a Dirichlet mixture of multinomials. That is, <span class="math inline">\(F_w\)</span> was simulated as a multinomial<span class="math inline">\((d,1)\)</span> with probability vector <span class="math inline">\(d\)</span> simualted via a Dirichlet.</p>
+</div>
+</div>
+<div id="references" class="section level2 unnumbered">
+<h2>References</h2>
+<div id="refs" class="references">
+<div id="ref-berger1999integrated">
+<p>Berger, James O, Brunero Liseo, Robert L Wolpert, and others. 1999. “Integrated Likelihood Methods for Eliminating Nuisance Parameters.” <em>Statistical Science</em> 14 (1). Institute of Mathematical Statistics: 1–28.</p>
+</div>
+<div id="ref-rubin1981bayesian">
+<p>Rubin, Donald B, and others. 1981. “The Bayesian Bootstrap.” <em>The Annals of Statistics</em> 9 (1). Institute of Mathematical Statistics: 130–34.</p>
+</div>
 </div>
 </div>
 
