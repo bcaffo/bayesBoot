@@ -10,7 +10,8 @@ bibliography: bibliography.bib
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## Bootstrap implied Bayes inference
+## Introduction
+
 Consider observed outcome data $y=(y_1, \ldots y_n)$ arising from density $f_y(y; \theta, \psi)$ depending on parameter of interest $\theta$ and nuisance paramter, $\psi$.
 Let $b = (b_1, \ldots, b_n)^t$ be a bootstrap resample. For example, $b = (b_1, \ldots, b_n)^t = (w_1^t y_1 \ldots w_n^2 y_n)$ where $w_i \sim_{iid} f_w$ where $f_w$ is a resampling distribution.  This could be described as linear bootstrap resampling in that it assumes a useful empirical distribution can be obtained by linearly resampling or reweighting the observed data.
 The classic non-parametric bootstrap sets $f_w$ as a multinomial distribution with one trial and equal category probabilities. Other resampling schemes might directly employ $f_y$ or other residual or parametric strategies. Our approach is largely agnostic to sampling strategy.
@@ -52,8 +53,35 @@ $$
 $$
 In the event that there is no nuisance parameter, then the integrated likelihood is simply the likelihood.
 
-When there is a nuisance parameter, $\pi$ must be estimated. Assuming that: *i.* the likelihood is known, *ii.* the conditional prior $\pi(\psi ~|~ \theta)$ is known  and *iii.* 
-$\pi(\psi ~|~ \theta, y)$ can be simulated from and evaluated, then $\pi(\theta)$ can be estimated using Monte Carlo via the bootstrap resamples. This requires estimating: $f_{\theta^*}$, $\gamma(\theta)$ and, if desired, $C$. The bootstrapped statistic density or mass function, $f_{\theta^*}(\theta)$, can be assumed known, or well approximated via the bootstrap resampled statistics. Given bootstrap simulations, $\theta^*_j$ and simulations $\psi_j \sim \pi(\psi ~|~ \theta^*_j, y)$, an approximation is given by importance sampling:
+We will see that it is useful use binning to calculate $f_{\theta^*}(\theta_k)$ for $k=1,\ldots,K$ discrete values of $\theta$. Define bins $a_0, a_1, \ldots, a_K$ and let $p_k$ be the count of $a_{k-1} < \theta_j^* \leq a_k$ for $k=1,\ldots,K$. Let $\theta_k = (a_k - a_{k-1})/2$ be the bin midpoints. While the histogram, $(\theta_k, p_k)$ is a reasonable density estimate for $f_{\theta^*}$, a better estimate smooths them, or perhaps logs the probabilities before smoothing [@eilers1996flexible]. Either way, the estimate of the prior is:
+$$
+\pi(\theta_k) \propto p_k / {\cal L}(\theta_k; y).
+$$
+In the event that the integrated likelihood, ${\cal L}$, 
+cannot be calculated, if $\pi(\psi ~|~ \theta)$ can be simulated from, an estimate can be obtained via:
+$p_k \frac{1}{N} \sum_{j} f_y(y; \theta_k , \psi_j).$
+
+Paradoxically, the prior depends on the data. Thus, it is important to emphasize the question this technique answers: "Approximately what prior would have given me this posterior?", rather than "What is a good prior for this data/likelihood?". This approximation could be smoothed over $\theta_k$ if desired.
+
+A benefit of treating the parameter distribution as discrete is that equation $\dagger$ will necessarily always hold, provided one does not put possitive probability in the bootstrap distribution on values outside of the support. Continous approximations could also be used, though will require either a parametric bootstrap sampling procedure or an interpolated estimate of $f_{\theta^*}$.   This seems unnecessary given the goals of the procedure. Specifically, one wants to loosely interogate Bayes models related to the bootstrap results.
+
+## Examples
+In this section, we give analytic examples of bootstrap concordance with Bayesian infernece. Subsequently, we numerically evaluate these examples. 
+
+### Normal mean
+Consider the instance where $y_i \sim N(\mu, 1/\psi)$ and $\pi(\psi ~|~ \mu) = \pi(\psi)$ is Gamma$(\alpha_0, \beta_0 / 2)$. Then the integrated likelihood is proportional to $\left(\sum_{i=1}^n (y_i - \theta)^2 + \beta_0\right)^{-n/2 - \alpha}$. Let $p_k$ be the estimated bootstrap probability associated with $\theta_k$. Then the associated prior is:
+
+$$
+\pi(\theta_k) \propto p_k \left(\sum_{i=1}^n(y_i - \theta_k)^2 + \beta_0\right)^{n/2 +\alpha}
+$$
+
+
+
+### Continuous approximations via Monte Carlo
+PROBABLY REMOVE THIS
+
+In the event that the calculations cannot be performed analytically, $\pi$ must be estimated. Assuming that: *i.* the likelihood is known, *ii.* the conditional prior $\pi(\psi ~|~ \theta)$ is known  and *iii.* 
+$\pi(\psi ~|~ \theta, y)$ can be simulated from and evaluated, then $\pi(\theta)$ can be estimated using Monte Carlo via the bootstrap resamples [similar to @efron2012bayesian]. This requires estimating: $f_{\theta^*}$, $\gamma(\theta)$ and, if desired, $C$. The bootstrapped statistic density or mass function, $f_{\theta^*}(\theta)$, can be assumed known, or well approximated via the bootstrap resampled statistics. Given bootstrap simulations, $\theta^*_j$ and simulations $\psi_j \sim \pi(\psi ~|~ \theta^*_j, y)$, an approximation is given by importance sampling:
 $$
 \hat C = \left( \frac{1}{N}\sum_{j=1}^N \frac{1}{f_y(y; \theta^*_j, \psi_j)} \right)^{-1}
 ~~~\mbox{and}~~~ \hat {\cal L}(\theta; y) = \frac{1}{N} \sum_{j=1}^N f_y(y;\theta, \psi_j)\frac{\pi(\theta_j)}{f_{\theta^*}(\theta_j^*)\pi(\psi_j ~|~ \theta_j^*, y)}.
@@ -71,38 +99,10 @@ $$
 $$
 
 A concern are errors in the estimation of the integrated likelihood for low probability values. 
-A second concern lies in issues when the prior is improper.
-
-## Discrete strategies
-
-An alternative strategy to bootstrap resampling is to employ discrete approximations to $f_{\theta^*}(\theta)$. In particular, given bootstrap resamples, define bins $a_0, a_1, \ldots, a_K$ and let $p_k$ be the count of $a_{k-1} < \theta_j^* \leq a_k$ for $k=1,\ldots,K$. Let $m_k = (a_k - a_{k-1})/2$ be the bin midpoints. While the histogram, $(m_k, p_k)$ is a reasonable density estimate for $f_{\theta^*}$, a better estimate smooths them, or perhaps logs the probabilities before smoothing [@eilers1996flexible]. One can then estimate ${\cal L}(\theta)$ by simulating from the prior $\pi(\psi ~|~ \theta)$ for each value of $m_k$. 
-
-
-## Analytic examples
-In this section, we give analytic examples of bootstrap concordance with Bayesian infernece. Subsequently, we numerically evaluate these examples. 
-
-### Beta binomial
-Let $f_w$ be such that the average of $n$ iid draws form a Dirichlet distribution with concentration parameter vector $(1/n \ldots 1/n)^t$. 
-Let $f_y$ be the product of $n$ Bernoulli mass functions with parameter $\theta$. Therefore, 
-$\theta^* = \frac{1}{n}\sum_{j=1}^n w^t_i y = d^t y$ is a bootstrap resampled proportion of successes where $d$ is the aforementioned Dirichlet draw.  As $d^t y$ is the sum of $J_n' y$ elements of $d$, $\theta^*$follows a Beta$(x, n-x)$ distribution. As their is no nuisance parameter, the prior is the ratio of the likelihood, binomial$(n, p)$, and prior, yielding a  uniform$[0,1]$ prior.
-
-### Normal mean
-Consider the instance where $f_y$ is a the product of $n$ $N(\theta, \psi)$ densities, $s$ is the sample mean and $f_w$ is a singular normal with mean $\frac{1}{n}J_n$ and variance $\frac{1}{n-1}(I - J_n J_n^t)$ where $J_n$ is an $n-$vector of ones. Then, $f_{\theta^*}$ is $N(\bar y, s^2_y / n)$ where $\bar y$ and $s^2$ are the sample mean and (unbiased) sample variance, respectively.  Under the assumption that $f_y$ is normal $\theta$, $\psi$ and $\pi$ is improper so that $\pi(\theta, \psi) = 1 / \psi$ we obtain the equality in Equation $\dagger$. 
-
-### Regression
-Let $f_y$ be $N(x\beta, \psi_2 I)$ for $x=[x_1 ~ x_2]$ where $x_1$ is $n\times 1$ and $x_2$ is $n\times p-1$ and $\beta=(\theta, \psi_1^t)^t$.  Let $b_i = [x_i^t (x^t x)^{-1} x^t + w_i ^t (I - x (x^t x)^{-1} x^t)] y$ where $w_i \sim N\left(0, \frac{1}{n-p}I\right)$ so that $b_i$ is the residual bootstrap assuming Gaussian errors.  Then, $b \sim N(x \hat \beta, s_p^2)$ where $s_p^2$ is the (unbiased) residual variance.
-$f_{\theta^*}(\theta) \sim N(\hat \theta, s_p^2 / [x_i^t (x^t x)^{-1} x_i])$. This corresponds to a flat (improper) prior on $\beta$ and a $1/\psi_2$ on $psi_2$.
-
-
-
-## Numerical examples
-
-The analytic examples display how the parametric bootstrap 
+A second concern lies in issues when the prior is improper. 
 
 
 ## Discussion
-
-### Relationship with Rubin's Bayesian bootstrap
 
 
 ## References

@@ -126,8 +126,8 @@ $(document).ready(function () {
 </div>
 
 
-<div id="bootstrap-implied-bayes-inference" class="section level2">
-<h2>Bootstrap implied Bayes inference</h2>
+<div id="introduction" class="section level2">
+<h2>Introduction</h2>
 <p>Consider observed outcome data <span class="math inline">\(y=(y_1, \ldots y_n)\)</span> arising from density <span class="math inline">\(f_y(y; \theta, \psi)\)</span> depending on parameter of interest <span class="math inline">\(\theta\)</span> and nuisance paramter, <span class="math inline">\(\psi\)</span>. Let <span class="math inline">\(b = (b_1, \ldots, b_n)^t\)</span> be a bootstrap resample. For example, <span class="math inline">\(b = (b_1, \ldots, b_n)^t = (w_1^t y_1 \ldots w_n^2 y_n)\)</span> where <span class="math inline">\(w_i \sim_{iid} f_w\)</span> where <span class="math inline">\(f_w\)</span> is a resampling distribution. This could be described as linear bootstrap resampling in that it assumes a useful empirical distribution can be obtained by linearly resampling or reweighting the observed data. The classic non-parametric bootstrap sets <span class="math inline">\(f_w\)</span> as a multinomial distribution with one trial and equal category probabilities. Other resampling schemes might directly employ <span class="math inline">\(f_y\)</span> or other residual or parametric strategies. Our approach is largely agnostic to sampling strategy.</p>
 <p>Let <span class="math inline">\(s\)</span> be a statistic so that <span class="math inline">\(\theta^* = s(b)\)</span> is a bootstrapped resampled statistic having density <span class="math inline">\(f_{\theta^*}(\theta)\)</span>. Let <span class="math inline">\(\pi(\theta, \psi)\)</span> be a joint prior. We are interested in conditions in which <span class="math inline">\(f_{\theta^*}(\theta)\)</span> can be considered a posterior marginalized over nuisance parameters. That is, <span class="math display">\[
 \dagger ~f_{\theta^*}(\theta) = \pi(\theta ~|~ y) = \frac{\int f_y(y; \theta, \psi) \pi(\theta, \psi) d\psi}{\int \int f_y(y; \tilde \theta, \tilde \psi) \pi(\tilde \theta, \tilde \psi) d\tilde \psi d\tilde \theta} = \int f_y(y; \theta, \psi) \pi(\theta, \psi) / C,
@@ -147,7 +147,27 @@ f_{\theta^*}(\theta) = \pi(\theta) \int f_y(y; \theta, \psi) \pi(\psi ~|~ \theta
 \]</span> where <span class="math display">\[{\cal L}(\theta) = \int f_y(y; \theta, \psi) \pi(\psi ~|~ \theta) d\psi\]</span> is the integrated likelihood <span class="citation">(see Berger et al. 1999)</span>. In other words, the implied prior from a bootstrap sampled statistic is <span class="math display">\[
 \pi(\theta) = \frac{f_{\theta^*}(\theta)C}{{\cal L}(\theta; y)} \propto_\theta \frac{f_{\theta^*}(\theta)}{{\cal L}(\theta; y)}
 \]</span> In the event that there is no nuisance parameter, then the integrated likelihood is simply the likelihood.</p>
-<p>When there is a nuisance parameter, <span class="math inline">\(\pi\)</span> must be estimated. Assuming that: <em>i.</em> the likelihood is known, <em>ii.</em> the conditional prior <span class="math inline">\(\pi(\psi ~|~ \theta)\)</span> is known and <em>iii.</em> <span class="math inline">\(\pi(\psi ~|~ \theta, y)\)</span> can be simulated from and evaluated, then <span class="math inline">\(\pi(\theta)\)</span> can be estimated using Monte Carlo via the bootstrap resamples. This requires estimating: <span class="math inline">\(f_{\theta^*}\)</span>, <span class="math inline">\(\gamma(\theta)\)</span> and, if desired, <span class="math inline">\(C\)</span>. The bootstrapped statistic density or mass function, <span class="math inline">\(f_{\theta^*}(\theta)\)</span>, can be assumed known, or well approximated via the bootstrap resampled statistics. Given bootstrap simulations, <span class="math inline">\(\theta^*_j\)</span> and simulations <span class="math inline">\(\psi_j \sim \pi(\psi ~|~ \theta^*_j, y)\)</span>, an approximation is given by importance sampling: <span class="math display">\[
+<p>In the event of non-parametric bootstrap simulation, one can calculate <span class="math inline">\(f_{\theta^*}(\theta_k)\)</span> for <span class="math inline">\(k=1,\ldots,K\)</span> discrete values of <span class="math inline">\(\theta\)</span>, if necessary binning. FDefine bins <span class="math inline">\(a_0, a_1, \ldots, a_K\)</span> and let <span class="math inline">\(p_k\)</span> be the count of <span class="math inline">\(a_{k-1} &lt; \theta_j^* \leq a_k\)</span> for <span class="math inline">\(k=1,\ldots,K\)</span>. Let <span class="math inline">\(\theta_k = (a_k - a_{k-1})/2\)</span> be the bin midpoints. While the histogram, <span class="math inline">\((\theta_k, p_k)\)</span> is a reasonable density estimate for <span class="math inline">\(f_{\theta^*}\)</span>, a better estimate smooths them, or perhaps logs the probabilities before smoothing <span class="citation">(Eilers and Marx 1996)</span>. Either way, the estimate of the prior is: <span class="math display">\[
+\pi(\theta_k) \propto p_k / {\cal L}(\theta_k; y).
+\]</span> In the event that the integrated likelihood, <span class="math inline">\({\cal L}\)</span>, cannot be calculated, if <span class="math inline">\(\pi(\psi ~|~ \theta)\)</span> can be simulated from, an estimate can be obtained via: <span class="math inline">\(p_k \frac{1}{N} \sum_{j} f_y(y; \theta_k , \psi_j).\)</span></p>
+<p>Paradoxically, the prior depends on the data. Thus, it is important to emphasize the question this technique answers: “Approximately what prior would have given me this posterior?”, rather than “What is a good prior for this data/likelihood?”. This approximation could be smoothed over <span class="math inline">\(\theta_k\)</span> if desired.</p>
+<p>A benefit of treating the parameter distribution as discrete is that equation <span class="math inline">\(\dagger\)</span> will necessarily always hold, provided one does not put possitive probability in the bootstrap distribution on values outside of the support. Continous approximations could also be used, though will require either a parametric bootstrap sampling procedure or an interpolated estimate of <span class="math inline">\(f_{\theta^*}\)</span>. This seems unnecessary given the goals of the procedure. Specifically, one wants to loosely interogate Bayes models related to the bootstrap results.</p>
+</div>
+</div>
+<div id="examples" class="section level2">
+<h2>Examples</h2>
+<p>In this section, we give analytic examples of bootstrap concordance with Bayesian infernece. Subsequently, we numerically evaluate these examples.</p>
+<div id="normal-mean" class="section level3">
+<h3>Normal mean</h3>
+<p>Consider the instance where <span class="math inline">\(y_i \sim N(\mu, 1/\psi)\)</span> and <span class="math inline">\(\pi(\psi ~|~ \mu) = \pi(\psi)\)</span> is Gamma<span class="math inline">\((\alpha_0, \beta_0 / 2)\)</span>. Then the integrated likelihood is proportional to <span class="math inline">\(\left(\sum_{i=1}^n (y_i - \theta)^2 + \beta_0\right)^{-n/2 - \alpha}\)</span>. Let <span class="math inline">\(p_k\)</span> be the estimated bootstrap probability associated with <span class="math inline">\(\theta_k\)</span>. Then the associated prior is:</p>
+<p><span class="math display">\[
+\pi(\theta_k) \propto p_k \left(\sum_{i=1}^n(y_i - \theta_k)^2 + \beta_0\right)^{n/2 +\alpha}
+\]</span></p>
+</div>
+<div id="continuous-approximations-via-monte-carlo" class="section level3">
+<h3>Continuous approximations via Monte Carlo</h3>
+<p>PROBABLY REMOVE THIS</p>
+<p>In the event that the calculations cannot be performed analytically, <span class="math inline">\(\pi\)</span> must be estimated. Assuming that: <em>i.</em> the likelihood is known, <em>ii.</em> the conditional prior <span class="math inline">\(\pi(\psi ~|~ \theta)\)</span> is known and <em>iii.</em> <span class="math inline">\(\pi(\psi ~|~ \theta, y)\)</span> can be simulated from and evaluated, then <span class="math inline">\(\pi(\theta)\)</span> can be estimated using Monte Carlo via the bootstrap resamples <span class="citation">(similar to Efron 2012)</span>. This requires estimating: <span class="math inline">\(f_{\theta^*}\)</span>, <span class="math inline">\(\gamma(\theta)\)</span> and, if desired, <span class="math inline">\(C\)</span>. The bootstrapped statistic density or mass function, <span class="math inline">\(f_{\theta^*}(\theta)\)</span>, can be assumed known, or well approximated via the bootstrap resampled statistics. Given bootstrap simulations, <span class="math inline">\(\theta^*_j\)</span> and simulations <span class="math inline">\(\psi_j \sim \pi(\psi ~|~ \theta^*_j, y)\)</span>, an approximation is given by importance sampling: <span class="math display">\[
 \hat C = \left( \frac{1}{N}\sum_{j=1}^N \frac{1}{f_y(y; \theta^*_j, \psi_j)} \right)^{-1}
 ~~~\mbox{and}~~~ \hat {\cal L}(\theta; y) = \frac{1}{N} \sum_{j=1}^N f_y(y;\theta, \psi_j)\frac{\pi(\theta_j)}{f_{\theta^*}(\theta_j^*)\pi(\psi_j ~|~ \theta_j^*, y)}.
 \]</span> The marginal likelihood estimate can be adapted as <span class="math display">\[
@@ -160,35 +180,8 @@ f_{\theta^*}(\theta) = \pi(\theta) \int f_y(y; \theta, \psi) \pi(\psi ~|~ \theta
 <p>A concern are errors in the estimation of the integrated likelihood for low probability values. A second concern lies in issues when the prior is improper.</p>
 </div>
 </div>
-<div id="discrete-strategies" class="section level2">
-<h2>Discrete strategies</h2>
-<p>An alternative strategy to bootstrap resampling is to employ discrete approximations to <span class="math inline">\(f_{\theta^*}(\theta)\)</span>. In particular, given bootstrap resamples, define bins <span class="math inline">\(a_0, a_1, \ldots, a_K\)</span> and let <span class="math inline">\(p_k\)</span> be the count of <span class="math inline">\(a_{k-1} &lt; \theta_j^* \leq a_k\)</span> for <span class="math inline">\(k=1,\ldots,K\)</span>. Let <span class="math inline">\(m_k = (a_k - a_{k-1})/2\)</span> be the bin midpoints. While the histogram, <span class="math inline">\((m_k, p_k)\)</span> is a reasonable density estimate for <span class="math inline">\(f_{\theta^*}\)</span>, a better estimate smooths them, or perhaps logs the probabilities before smoothing <span class="citation">(<span class="citeproc-not-found" data-reference-id="eilers1996flexible"><strong>???</strong></span>)</span>. One can then estimate <span class="math inline">\({\cal L}(\theta)\)</span> by simulating from the prior <span class="math inline">\(\pi(\psi ~|~ \theta)\)</span> for each value of <span class="math inline">\(m_k\)</span>.</p>
-</div>
-<div id="analytic-examples" class="section level2">
-<h2>Analytic examples</h2>
-<p>In this section, we give analytic examples of bootstrap concordance with Bayesian infernece. Subsequently, we numerically evaluate these examples.</p>
-<div id="beta-binomial" class="section level3">
-<h3>Beta binomial</h3>
-<p>Let <span class="math inline">\(f_w\)</span> be such that the average of <span class="math inline">\(n\)</span> iid draws form a Dirichlet distribution with concentration parameter vector <span class="math inline">\((1/n \ldots 1/n)^t\)</span>. Let <span class="math inline">\(f_y\)</span> be the product of <span class="math inline">\(n\)</span> Bernoulli mass functions with parameter <span class="math inline">\(\theta\)</span>. Therefore, <span class="math inline">\(\theta^* = \frac{1}{n}\sum_{j=1}^n w^t_i y = d^t y\)</span> is a bootstrap resampled proportion of successes where <span class="math inline">\(d\)</span> is the aforementioned Dirichlet draw. As <span class="math inline">\(d^t y\)</span> is the sum of <span class="math inline">\(J_n' y\)</span> elements of <span class="math inline">\(d\)</span>, <span class="math inline">\(\theta^*\)</span>follows a Beta<span class="math inline">\((x, n-x)\)</span> distribution. As their is no nuisance parameter, the prior is the ratio of the likelihood, binomial<span class="math inline">\((n, p)\)</span>, and prior, yielding a uniform<span class="math inline">\([0,1]\)</span> prior.</p>
-</div>
-<div id="normal-mean" class="section level3">
-<h3>Normal mean</h3>
-<p>Consider the instance where <span class="math inline">\(f_y\)</span> is a the product of <span class="math inline">\(n\)</span> <span class="math inline">\(N(\theta, \psi)\)</span> densities, <span class="math inline">\(s\)</span> is the sample mean and <span class="math inline">\(f_w\)</span> is a singular normal with mean <span class="math inline">\(\frac{1}{n}J_n\)</span> and variance <span class="math inline">\(\frac{1}{n-1}(I - J_n J_n^t)\)</span> where <span class="math inline">\(J_n\)</span> is an <span class="math inline">\(n-\)</span>vector of ones. Then, <span class="math inline">\(f_{\theta^*}\)</span> is <span class="math inline">\(N(\bar y, s^2_y / n)\)</span> where <span class="math inline">\(\bar y\)</span> and <span class="math inline">\(s^2\)</span> are the sample mean and (unbiased) sample variance, respectively. Under the assumption that <span class="math inline">\(f_y\)</span> is normal <span class="math inline">\(\theta\)</span>, <span class="math inline">\(\psi\)</span> and <span class="math inline">\(\pi\)</span> is improper so that <span class="math inline">\(\pi(\theta, \psi) = 1 / \psi\)</span> we obtain the equality in Equation <span class="math inline">\(\dagger\)</span>.</p>
-</div>
-<div id="regression" class="section level3">
-<h3>Regression</h3>
-<p>Let <span class="math inline">\(f_y\)</span> be <span class="math inline">\(N(x\beta, \psi_2 I)\)</span> for <span class="math inline">\(x=[x_1 ~ x_2]\)</span> where <span class="math inline">\(x_1\)</span> is <span class="math inline">\(n\times 1\)</span> and <span class="math inline">\(x_2\)</span> is <span class="math inline">\(n\times p-1\)</span> and <span class="math inline">\(\beta=(\theta, \psi_1^t)^t\)</span>. Let <span class="math inline">\(b_i = [x_i^t (x^t x)^{-1} x^t + w_i ^t (I - x (x^t x)^{-1} x^t)] y\)</span> where <span class="math inline">\(w_i \sim N\left(0, \frac{1}{n-p}I\right)\)</span> so that <span class="math inline">\(b_i\)</span> is the residual bootstrap assuming Gaussian errors. Then, <span class="math inline">\(b \sim N(x \hat \beta, s_p^2)\)</span> where <span class="math inline">\(s_p^2\)</span> is the (unbiased) residual variance. <span class="math inline">\(f_{\theta^*}(\theta) \sim N(\hat \theta, s_p^2 / [x_i^t (x^t x)^{-1} x_i])\)</span>. This corresponds to a flat (improper) prior on <span class="math inline">\(\beta\)</span> and a <span class="math inline">\(1/\psi_2\)</span> on <span class="math inline">\(psi_2\)</span>.</p>
-</div>
-</div>
-<div id="numerical-examples" class="section level2">
-<h2>Numerical examples</h2>
-<p>The analytic examples display how the parametric bootstrap</p>
-</div>
 <div id="discussion" class="section level2">
 <h2>Discussion</h2>
-<div id="relationship-with-rubins-bayesian-bootstrap" class="section level3">
-<h3>Relationship with Rubin’s Bayesian bootstrap</h3>
-</div>
 </div>
 <div id="references" class="section level2 unnumbered">
 <h2>References</h2>
@@ -198,6 +191,9 @@ f_{\theta^*}(\theta) = \pi(\theta) \int f_y(y; \theta, \psi) \pi(\psi ~|~ \theta
 </div>
 <div id="ref-efron2012bayesian">
 <p>Efron, Bradley. 2012. “Bayesian Inference and the Parametric Bootstrap.” <em>The Annals of Applied Statistics</em> 6 (4). NIH Public Access: 1971.</p>
+</div>
+<div id="ref-eilers1996flexible">
+<p>Eilers, Paul HC, and Brian D Marx. 1996. “Flexible Smoothing with B-Splines and Penalties.” <em>Statistical Science</em>. JSTOR, 89–102.</p>
 </div>
 <div id="ref-newton1994approximate">
 <p>Newton, Michael A, and Adrian E Raftery. 1994. “Approximate Bayesian Inference with the Weighted Likelihood Bootstrap.” <em>Journal of the Royal Statistical Society. Series B (Methodological)</em>. JSTOR, 3–48.</p>
