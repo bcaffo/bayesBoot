@@ -88,6 +88,9 @@ The analytic examples display how the parametric bootstrap
 ### Relationship with Rubin's Bayesian bootstrap
 Rubin presented a Bayesian bootstrap  (@rubin1981bayesian) where the empirical probability distribution was simulated as a Dirichlet mixture of multinomials. That is, $F_w$ was simulated as a multinomial$(d,1)$ with probability vector $d$ simualted via a Dirichlet.  
 
+@newton1994approximate have an approach similar to ours, utilizing a weighted likelihood version of the bootstrap.
+
+
 ## References
 
 
