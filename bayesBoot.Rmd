@@ -8,11 +8,12 @@ bibliography: bibliography.bib
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2); library(dplyr); library(mgcv)
 ```
 
 ## Introduction
 
-Consider observed outcome data $y=(y_1, \ldots y_n)$ arising from density $f_y(y; \theta, \psi)$ depending on parameter of interest $\theta$ and nuisance paramter, $\psi$.
+Consider observed outcome data $y=(y_1, \ldots y_n)$ arising from density $f_y(y; \theta, \psi)$ depending on parameter of interest $\theta$ and nuisance parameter, $\psi$.
 Let $b = (b_1, \ldots, b_n)^t$ be a bootstrap resample. For example, $b = (b_1, \ldots, b_n)^t = (w_1^t y_1 \ldots w_n^2 y_n)$ where $w_i \sim_{iid} f_w$ where $f_w$ is a resampling distribution.  This could be described as linear bootstrap resampling in that it assumes a useful empirical distribution can be obtained by linearly resampling or reweighting the observed data.
 The classic non-parametric bootstrap sets $f_w$ as a multinomial distribution with one trial and equal category probabilities. Other resampling schemes might directly employ $f_y$ or other residual or parametric strategies. Our approach is largely agnostic to sampling strategy.
 
@@ -23,7 +24,7 @@ $$
 $$
 where $C$ is the normalizing constant.
 
-The left hand side of this equation depends on the bootstrap sampling distribution (such as choice of $f_w$) and $s$ (the statistic), whereas the righthand side depends on $f_y$ (the likelihood) and $\pi$ (the prior). Choose any three and the fourth is determined, assuming a solution to the equation exists for the choices. 
+The left hand side of this equation depends on the bootstrap sampling distribution (such as choice of $f_w$) and $s$ (the statistic), whereas the right hand side depends on $f_y$ (the likelihood) and $\pi$ (the prior). Choose any three and the fourth is determined, assuming a solution to the equation exists for the choices. 
 
 It is easy to conceptualize instances where this equality necessarily fails; not every marginal posterior arises from a proper prior given a likelihood. Several examples where improper priors are obtained are given below. In addition, when using the non-parametric bootstrap, one obtains a prior distribution depending on the data, truly violating the nature of the approach. Finally, the statistic might produces estimates outside of the range of the parameter, such as negative variance components, which will clearly yield no acceptable solution to $\dagger$.
 
@@ -33,74 +34,89 @@ While this potential identity is interesting in its own right, we are primarily 
 In addition, settings for which this equation holds may have large pedagogical advantages by yielding equivalent Bayesian and frequency inferences within the same framework. In other words, one could teach a fairly unified variation of statistic using the bootstrap, a technique already of fundamental importance in introductory statistics instruction.
 
 The approach derives heavily from @efron2012bayesian (BIATPB), with some notable differences. First,
-BIATPB considers only parametric settings, whereas we also consider non-parametric settings. Secondly, the primary goal of BIATPB is to produce Bayesian inferences via the bootstrap. Our consideration is more wholistic. We are interested in general in connections between Bayesian inference and the bootstrap. In this manuscript, we focus on discovering the prior given a bootstrapping scheme, statistic and likelihood. 
+BIATPB considers only parametric settings, whereas we also consider non-parametric settings. Secondly, the primary goal of BIATPB is to produce Bayesian inferences via the bootstrap. Our consideration is more holistic. We are interested in general in connections between Bayesian inference and the bootstrap. In this manuscript, we focus on discovering the prior given a bootstrapping scheme, statistic and likelihood. 
 
-@newton1994approximate have an approach similar to ours, utilizing a weighted likelihood version of the bootstrap. However, our approach is more directly related to non-parametric bootstrap sampling as it's implimented. 
+@newton1994approximate have an approach similar to ours, utilizing a weighted likelihood version of the bootstrap. However, our approach is more directly related to non-parametric bootstrap sampling as it's implemented. 
 
-Rubin presented a Bayesian bootstrap  [@rubin1981bayesian] where the empirical probability distribution was simulated as a Dirichlet mixture of multinomials. That is, $F_w$ was simulated as a multinomial$(d,1)$ with probability vector $d$ simualted via a Dirichlet.  
+Rubin presented a Bayesian bootstrap  [@rubin1981bayesian] where the empirical probability distribution was simulated as a Dirichlet mixture of multinomials. That is, $F_w$ was simulated as a multinomial$(d,1)$ with probability vector $d$ simulated via a Dirichlet.  
 
 
 
-### Bootstrap associated prior
+### Bootstrap integrated likelihood relationship
 Given the relationship given by $\dagger$, we have:
 $$
-f_{\theta^*}(\theta) = \pi(\theta) \int f_y(y; \theta, \psi) \pi(\psi ~|~ \theta) d\psi / C
+\dagger \dagger ~~ f_{\theta^*}(\theta) = \pi(\theta) \int f_y(y; \theta, \psi) \pi(\psi ~|~ \theta) d\psi / C
 = \pi(\theta) {\cal L}(\theta; y) / C,
 $$
-where $${\cal L}(\theta) = \int f_y(y; \theta, \psi) \pi(\psi ~|~ \theta) d\psi$$ is the integrated likelihood [see @berger1999integrated]. In other words, the implied prior from a bootstrap sampled statistic is
-$$
-\pi(\theta) = \frac{f_{\theta^*}(\theta)C}{{\cal L}(\theta; y)} \propto_\theta \frac{f_{\theta^*}(\theta)}{{\cal L}(\theta; y)}
-$$
-In the event that there is no nuisance parameter, then the integrated likelihood is simply the likelihood.
+where $${\cal L}(\theta) = \int f_y(y; \theta, \psi) \pi(\psi ~|~ \theta) d\psi$$ is the integrated likelihood [see @berger1999integrated]. In the event that there is no nuisance parameter, then the integrated likelihood is simply the likelihood.
 
-We will see that it is useful use binning to calculate $f_{\theta^*}(\theta_k)$ for $k=1,\ldots,K$ discrete values of $\theta$. Define bins $a_0, a_1, \ldots, a_K$ and let $p_k$ be the count of $a_{k-1} < \theta_j^* \leq a_k$ for $k=1,\ldots,K$. Let $\theta_k = (a_k - a_{k-1})/2$ be the bin midpoints. While the histogram, $(\theta_k, p_k)$ is a reasonable density estimate for $f_{\theta^*}$, a better estimate smooths them, or perhaps logs the probabilities before smoothing [@eilers1996flexible]. Either way, the estimate of the prior is:
+Thus, one can solve for the prior or integrated likelihood as:
 $$
-\pi(\theta_k) \propto p_k / {\cal L}(\theta_k; y).
+{\cal L}(\theta; y) \propto_\theta \frac{f_{\theta^*}(\theta)}{\pi(\theta)} ~~~\mbox{or}~~~ \pi(\theta) \propto_\theta \frac{f_{\theta^*}(\theta)}{{\cal L}(\theta; y)}
 $$
-In the event that the integrated likelihood, ${\cal L}$, 
-cannot be calculated, if $\pi(\psi ~|~ \theta)$ can be simulated from, an estimate can be obtained via:
-$p_k \frac{1}{N} \sum_{j} f_y(y; \theta_k , \psi_j).$
 
-Paradoxically, the prior depends on the data. Thus, it is important to emphasize the question this technique answers: "Approximately what prior would have given me this posterior?", rather than "What is a good prior for this data/likelihood?". This approximation could be smoothed over $\theta_k$ if desired.
 
-A benefit of treating the parameter distribution as discrete is that equation $\dagger$ will necessarily always hold, provided one does not put possitive probability in the bootstrap distribution on values outside of the support. Continous approximations could also be used, though will require either a parametric bootstrap sampling procedure or an interpolated estimate of $f_{\theta^*}$.   This seems unnecessary given the goals of the procedure. Specifically, one wants to loosely interogate Bayes models related to the bootstrap results.
+We will see that it is useful use binning to calculate $f_{\theta^*}(\theta_k)$ for $k=1,\ldots,K$ discrete values of $\theta$. Define bins $a_0, a_1, \ldots, a_K$ and let $p_k$ be the count of $a_{k-1} < \theta_j^* \leq a_k$ for $k=1,\ldots,K$. Let $\theta_k = (a_k - a_{k-1})/2$ be the bin midpoints. While the histogram, $(\theta_k, p_k)$ is a reasonable density estimate for $f_{\theta^*}$, a better estimate smooths them, or perhaps logs the probabilities before smoothing [@eilers1996flexible]. Our approach fits a smooth Poisson GAM to the bincounts [as in @eilers1996flexible]. Regardless, assuming that the $p_k$ are the bin probabilities, the estimate of the integrated likelihood or prior is:
+$$
+{\cal L}(\theta_k; y) \propto_\theta \frac{p_k}{\pi(\theta)} ~~~\mbox{or}~~~ \pi(\theta_k) \propto \frac{p_k}{{\cal L}(\theta_k; y)}.
+$$
+
+
+When calculating for the prior, paradoxically, the estimated prior depends on the data. Thus, it is important to emphasize the question this technique answers: "Approximately what prior would have given me this posterior?", rather than "What is a good prior for this data/likelihood?". It is also worth emphasizing that the conditional prior $\pi(\psi ~|~ \theta)$ and likelihood are required to calculate the integrated likelihood. In the event that the integrated likelihood, ${\cal L}$, 
+cannot be calculated analytically, if $\pi(\psi ~|~ \theta)$ can be simulated from, an estimate can be obtained via: $p_k \frac{1}{N} \sum_{j} f_y(y; \theta_k , \psi_j).$ 
+
+Similarly, when calculating for the integrated likelihood, it also should be stressed that no guarantees can be given that resulting function corresponds to an actual integrated likelihood that one would reasonably fit to data. If one wants the actual likelihood, a prior for $\pi(\psi ~|~ \theta)$ is required as well as a solution to the inverse problem. This approach simply answers the question "What integrated likelihood combined with this prior would yield my bootstrapped statistics distribution?".
+
+A benefit of treating the parameter distribution as discrete is that equation $\dagger$ will necessarily always hold, provided one does not put positive probability in the bootstrap distribution on values outside of the support. Continuous approximations could also be used, though will require either a parametric bootstrap sampling procedure or an interpolated estimate of $f_{\theta^*}$.   This seems unnecessary given the goals of the procedure. Specifically, one wants to loosely interrogate Bayes models related to the bootstrap results.
 
 ## Examples
-In this section, we give analytic examples of bootstrap concordance with Bayesian infernece. Subsequently, we numerically evaluate these examples. 
+In this section, we give analytic examples of bootstrap concordance with Bayesian inference. Subsequently, we numerically evaluate these examples. 
 
-### Normal mean
+### Estimation of the mean
 Consider the instance where $y_i \sim N(\mu, 1/\psi)$ and $\pi(\psi ~|~ \mu) = \pi(\psi)$ is Gamma$(\alpha_0, \beta_0 / 2)$. Then the integrated likelihood is proportional to $\left(\sum_{i=1}^n (y_i - \theta)^2 + \beta_0\right)^{-n/2 - \alpha}$. Let $p_k$ be the estimated bootstrap probability associated with $\theta_k$. Then the associated prior is:
 
 $$
 \pi(\theta_k) \propto p_k \left(\sum_{i=1}^n(y_i - \theta_k)^2 + \beta_0\right)^{n/2 +\alpha}
 $$
 
+More easily, if the prior is $\pi=N(\mu_0, 1/\tau_0)$ then the estimated integrated likelihood is
 
+$$p_k \exp\left\{\frac{1}{2}(\theta - \mu_0)^2 \tau_0\right\}.$$
 
-### Continuous approximations via Monte Carlo
-PROBABLY REMOVE THIS
+Consider the sleep heart health study respiratory disturbance index (RDI) data transformed as $\log(RDI+1)$ [REFERENCE]. 
+```{r histrdi, echo = TRUE, message = FALSE}
+dat = read.table("shhs1.txt", header = TRUE) %>% mutate(y = log(rdi4p + 1))
+#ggplot(dat, aes(y)) + geom_histogram() + xlab("log(RDI + 1)")
+y = dat$y
+hist(y, breaks = 50, xlab = "Log(RDI + 1)")
+```
 
-In the event that the calculations cannot be performed analytically, $\pi$ must be estimated. Assuming that: *i.* the likelihood is known, *ii.* the conditional prior $\pi(\psi ~|~ \theta)$ is known  and *iii.* 
-$\pi(\psi ~|~ \theta, y)$ can be simulated from and evaluated, then $\pi(\theta)$ can be estimated using Monte Carlo via the bootstrap resamples [similar to @efron2012bayesian]. This requires estimating: $f_{\theta^*}$, $\gamma(\theta)$ and, if desired, $C$. The bootstrapped statistic density or mass function, $f_{\theta^*}(\theta)$, can be assumed known, or well approximated via the bootstrap resampled statistics. Given bootstrap simulations, $\theta^*_j$ and simulations $\psi_j \sim \pi(\psi ~|~ \theta^*_j, y)$, an approximation is given by importance sampling:
-$$
-\hat C = \left( \frac{1}{N}\sum_{j=1}^N \frac{1}{f_y(y; \theta^*_j, \psi_j)} \right)^{-1}
-~~~\mbox{and}~~~ \hat {\cal L}(\theta; y) = \frac{1}{N} \sum_{j=1}^N f_y(y;\theta, \psi_j)\frac{\pi(\theta_j)}{f_{\theta^*}(\theta_j^*)\pi(\psi_j ~|~ \theta_j^*, y)}.
-$$
-The marginal likelihood estimate can be adapted as
-$$
-\frac{\sum_{j=1}^N f_y(y;\theta, \psi_j)\frac{\pi(\theta_j)}{f_{\theta^*}(\theta_j^*)\pi(\psi_j ~|~ \theta_j^*, y)}}{\sum_{j=1}^N \frac{\pi(\theta_j)}{f_{\theta^*}(\theta_j^*)\pi(\psi_j ~|~ \theta_j^*, y)}},
-$$
+Now lets perform the bootstrap.
+```{r bootstrap, message = FALSE}
+n = length(y); B = 1000
+## perform the bootstrap
+thetaStar = apply(matrix(sample(y, n * B, replace = TRUE), n, B), 1, mean)
+## raw histogram
+h = hist(thetaStar, breaks = 50, xlab = "Theta Star", main = "Hist of theta star")
+## smoothed histogram
+theta = h$mids; p = h$counts
+fit.smooth = gam(p ~ s(theta), family = "poisson")
+phat = predict(fit.smooth, type = "response")
+lines(theta, phat, lwd = 2, col = "darkblue")
+```
 
-if $\pi(\psi ~|~ \theta, y)$ can only be calculated up to constants of proportionality.
-
-Thus out estimate of $\pi(\theta)$ is:
-$$
-\hat \pi(\theta) = \frac{f_{\theta^*}(\theta)}{\hat {\cal L}(\theta)} \hat C \propto_\theta \frac{f_{\theta^*}(\theta)}{\hat {\cal L}(\theta)}.
-$$
-
-A concern are errors in the estimation of the integrated likelihood for low probability values. 
-A second concern lies in issues when the prior is improper. 
-
+```{r postBayes}
+mu0 = 1.7; sigma0 = 0.05
+prior = dnorm(theta, mean = mu0, sd = sigma0)
+intLike =  phat / prior
+plot(theta, intLike / max(intLike), 
+     type = "l", 
+     col = "darkred", 
+     lwd = 2, 
+     frame = FALSE)
+lines(theta, phat / max(phat), lwd = 2, col = "darkblue")
+lines(theta, prior / max(prior), lwd = 2, col = "darkgreen")
+```
 
 ## Discussion
 
